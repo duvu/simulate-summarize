@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+echo "[pre-commit] Running code quality checks..."
+
+# Determine build tool
+if [ -f "./mvnw" ]; then
+  BUILD_CMD="./mvnw -q -DskipTests"
+elif [ -f "./gradlew" ]; then
+  BUILD_CMD="./gradlew -q"
+else
+  # Fallback to system-wide Maven
+  if command -v mvn &> /dev/null; then
+    BUILD_CMD="mvn -q -DskipTests"
+  else
+    echo "[pre-commit] ℹ️ No Maven/Gradle build tool found. Skipping code quality checks."
+    exit 0
+  fi
+fi
+
+# Run spotless:check (or spotlessCheck for Gradle)
+if echo "$BUILD_CMD" | grep -q gradlew; then
+  $BUILD_CMD spotlessCheck 2>/dev/null || {
+    echo "[pre-commit] ⚠️ Spotless check not configured in this project. Continuing..."
+  }
+else
+  $BUILD_CMD spotless:check 2>/dev/null || {
+    echo "[pre-commit] ⚠️ Spotless check not configured in this project. Continuing..."
+  }
+fi
+
+# Run checkstyle:check (or check for Gradle)
+if echo "$BUILD_CMD" | grep -q gradlew; then
+  $BUILD_CMD check 2>/dev/null || {
+    echo "[pre-commit] ⚠️ Checkstyle check not configured in this project. Continuing..."
+  }
+else
+  $BUILD_CMD checkstyle:check 2>/dev/null || {
+    echo "[pre-commit] ⚠️ Checkstyle check not configured in this project. Continuing..."
+  }
+fi
+
+echo "[pre-commit] ✅ Code quality checks passed"

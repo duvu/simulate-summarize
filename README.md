@@ -127,3 +127,20 @@ The project uses JaCoCo for code coverage. After running tests with the coverage
 # View coverage report
 open target/site/jacoco/index.html
 ```
+
+## Setup Git Hooks
+
+This project uses pure Git hooks (no Node.js or Husky required) to enforce code quality standards before commits and pushes.
+
+**Install hooks:**
+
+```bash
+bash scripts/setup-hooks.sh
+```
+
+**What the hooks do:**
+
+- **pre-commit**: Runs code quality checks (spotless formatting, checkstyle validation)
+- **pre-push**: Runs unit tests
+
+The hooks use Maven/Gradle wrappers if available, otherwise fall back to system-wide installations.

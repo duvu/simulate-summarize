@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+echo "[pre-push] Running unit tests..."
+
+# Determine build tool
+if [ -f "./mvnw" ]; then
+  BUILD_CMD="./mvnw -q"
+elif [ -f "./gradlew" ]; then
+  BUILD_CMD="./gradlew -q"
+else
+  if command -v mvn &> /dev/null; then
+    BUILD_CMD="mvn -q"
+  else
+    echo "[pre-push] ⚠️ No build tool found. Skipping tests."
+    exit 0
+  fi
+fi
+
+# Run tests
+if echo "$BUILD_CMD" | grep -q gradlew; then
+  $BUILD_CMD test || {
+    echo "[pre-push] ❌ Tests failed. Fix them before pushing."
+    exit 1
+  }
+else
+  $BUILD_CMD test || {
+    echo "[pre-push] ❌ Tests failed. Fix them before pushing."
+    exit 1
+  }
+fi
+
+echo "[pre-push] ✅ Tests passed"
